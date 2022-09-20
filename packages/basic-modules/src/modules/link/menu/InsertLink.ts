@@ -4,16 +4,9 @@
  */
 
 import { Editor, Range, Node } from 'slate'
-import {
-  IModalMenu,
-  IDomEditor,
-  genModalInputElems,
-  genModalButtonElems,
-  t,
-} from '@wangeditor/core'
+import { IModalMenu, IDomEditor, genModalButtonElems, t } from '@wangeditor/core'
 import $, { Dom7Array, DOMElement } from '../../../utils/dom'
 import { genRandomStr } from '../../../utils/util'
-import { LINK_SVG } from '../../../constants/icon-svg'
 import { isMenuDisabled, insertLink } from '../helper'
 
 /**
@@ -23,15 +16,50 @@ function genDomID(): string {
   return genRandomStr('w-e-insert-link')
 }
 
+/**
+ * 生成 modal input elems
+ * @param labelText label text
+ * @param inputId input dom id
+ * @param placeholder input placeholder
+ * @returns [$container, $input]
+ */
+function genModalInputElems(
+  labelText: string,
+  inputId: string,
+  placeholder?: string
+): DOMElement[] {
+  const $container = $('<label class="babel-container"></label>')
+  $container.append(`<span style="display: inline-block;">${labelText}</span>`)
+  const $input = $(
+    `<input type="text" style="width: auto;" id="${inputId}" placeholder="${placeholder || ''}">`
+  )
+  $container.append($input)
+
+  return [$container[0], $input[0]]
+}
+
+function genUsuallyTagElems(list: string[], clickFn: Function): DOMElement[] {
+  const $tagContainer = $('<div class="usually-tag-container babel-container"></div>')
+  $tagContainer.append('<span style="display: inline-block;">常用：</span>')
+  list.forEach(val => {
+    const $tag = $(`<span class="usually-tag" name=${val}>${val}</span>`)
+    $tag.on('click', () => {
+      console.log(val)
+      clickFn(val)
+    })
+    $tagContainer.append($tag)
+  })
+  return [$tagContainer[0]]
+}
+
 class InsertLinkMenu implements IModalMenu {
-  readonly title = '动态文本框'
+  readonly title = '动态数据源'
   readonly iconSvg = '<img src="/static/wangEditor-dynamic-icon.png" width="20">'
   readonly tag = 'button'
   readonly showModal = true // 点击 button 时显示 modal
   readonly modalWidth = 300
   private $content: Dom7Array | null = null
   private readonly textInputId = genDomID()
-  private readonly urlInputId = genDomID()
   private readonly buttonId = genDomID()
 
   getValue(editor: IDomEditor): string | boolean {
@@ -59,24 +87,31 @@ class InsertLinkMenu implements IModalMenu {
 
   getModalContentElem(editor: IDomEditor): DOMElement {
     const { selection } = editor
-    const { textInputId, urlInputId, buttonId } = this
+    const { textInputId, buttonId } = this
 
     // 获取 input button elem
-    const [textContainerElem, inputTextElem] = genModalInputElems('请输入数据源名称', textInputId)
+    const [textContainerElem, inputTextElem] = genModalInputElems('自定义：', textInputId)
     const $inputText = $(inputTextElem)
-    const [buttonContainerElem] = genModalButtonElems(buttonId, t('common.ok'))
+    const [buttonContainerElem, buttonElem] = genModalButtonElems(buttonId, t('common.ok'))
+
+    // 常用字段
+    const [tagContainerElem] = genUsuallyTagElems(['班级', '学生姓名', '奖项'], (value: string) => {
+      insertLink(editor, value, 'javascript:void(0);')
+      editor.hidePanelOrModal() // 隐藏 modal
+    })
 
     if (this.$content == null) {
       // 第一次渲染
-      const $content = $('<div></div>')
+      const $content = $('<div class="uni-dynamic-modal"></div>')
 
       // 绑定事件（第一次渲染时绑定，不要重复绑定）
       $content.on('click', `#${buttonId}`, e => {
         e.preventDefault()
         const text = $content.find(`#${textInputId}`).val()
-        const url = $content.find(`#${urlInputId}`).val()
-        insertLink(editor, text, url || 'javascript:void(0);') // 插入链接
-        editor.hidePanelOrModal() // 隐藏 modal
+        if (text) {
+          insertLink(editor, text, 'javascript:void(0);') // 插入链接
+          editor.hidePanelOrModal() // 隐藏 modal
+        }
       })
 
       // 记录属性，重要
@@ -87,6 +122,8 @@ class InsertLinkMenu implements IModalMenu {
     $content.empty() // 先清空内容
 
     // append inputs and button
+    $content.append('<p style="font-weight:bold;margin-bottom: 14px;">动态数据源</p>')
+    $content.append(tagContainerElem)
     $content.append(textContainerElem)
     $content.append(buttonContainerElem)
 
