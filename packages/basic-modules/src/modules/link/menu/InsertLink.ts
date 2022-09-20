@@ -24,8 +24,8 @@ function genDomID(): string {
 }
 
 class InsertLinkMenu implements IModalMenu {
-  readonly title = t('link.insert')
-  readonly iconSvg = LINK_SVG
+  readonly title = '动态文本框'
+  readonly iconSvg = '<img src="/static/wangEditor-dynamic-icon.png" width="20">'
   readonly tag = 'button'
   readonly showModal = true // 点击 button 时显示 modal
   readonly modalWidth = 300
@@ -62,10 +62,8 @@ class InsertLinkMenu implements IModalMenu {
     const { textInputId, urlInputId, buttonId } = this
 
     // 获取 input button elem
-    const [textContainerElem, inputTextElem] = genModalInputElems(t('link.text'), textInputId)
+    const [textContainerElem, inputTextElem] = genModalInputElems('请输入数据源名称', textInputId)
     const $inputText = $(inputTextElem)
-    const [urlContainerElem, inputUrlElem] = genModalInputElems(t('link.url'), urlInputId)
-    const $inputUrl = $(inputUrlElem)
     const [buttonContainerElem] = genModalButtonElems(buttonId, t('common.ok'))
 
     if (this.$content == null) {
@@ -77,7 +75,7 @@ class InsertLinkMenu implements IModalMenu {
         e.preventDefault()
         const text = $content.find(`#${textInputId}`).val()
         const url = $content.find(`#${urlInputId}`).val()
-        insertLink(editor, text, url) // 插入链接
+        insertLink(editor, text, url || 'javascript:void(0);') // 插入链接
         editor.hidePanelOrModal() // 隐藏 modal
       })
 
@@ -90,7 +88,6 @@ class InsertLinkMenu implements IModalMenu {
 
     // append inputs and button
     $content.append(textContainerElem)
-    $content.append(urlContainerElem)
     $content.append(buttonContainerElem)
 
     // 设置 input val
@@ -102,7 +99,6 @@ class InsertLinkMenu implements IModalMenu {
       const selectionText = Editor.string(editor, selection)
       $inputText.val(selectionText)
     }
-    $inputUrl.val('')
 
     // focus 一个 input（异步，此时 DOM 尚未渲染）
     setTimeout(() => {
