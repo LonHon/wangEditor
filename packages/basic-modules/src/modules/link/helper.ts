@@ -108,17 +108,12 @@ export async function insertLink(editor: IDomEditor, text: string, url: string) 
   if (selection == null) return
   const isCollapsed = Range.isCollapsed(selection)
 
+  // 链接前后插入空格，方便操作
+  editor.insertText(' ')
   // 执行：插入链接
   if (isCollapsed) {
-    // 链接前后插入空格，方便操作
-    editor.insertText(' ')
-
     const linkNode = genLinkNode(parsedUrl, text)
     Transforms.insertNodes(editor, linkNode)
-
-    // https://github.com/wangeditor-team/wangEditor/issues/332
-    // 不能直接使用 insertText, 会造成添加的空格被添加到链接文本中，参考上面 issue，替换为 insertFragment 方式添加空格
-    editor.insertFragment([{ text: ' ' }])
   } else {
     const selectedText = Editor.string(editor, selection) // 选中的文字
     if (selectedText !== text) {
@@ -133,6 +128,9 @@ export async function insertLink(editor: IDomEditor, text: string, url: string) 
       Transforms.collapse(editor, { edge: 'end' })
     }
   }
+  // https://github.com/wangeditor-team/wangEditor/issues/332
+  // 不能直接使用 insertText, 会造成添加的空格被添加到链接文本中，参考上面 issue，替换为 insertFragment 方式添加空格
+  editor.insertFragment([{ text: ' ' }])
 }
 
 /**
