@@ -95,10 +95,13 @@ class InsertLinkMenu implements IModalMenu {
     const [buttonContainerElem, buttonElem] = genModalButtonElems(buttonId, t('common.ok'))
 
     // 常用字段
-    const [tagContainerElem] = genUsuallyTagElems(['班级', '学生姓名', '奖项'], (value: string) => {
-      insertLink(editor, value, 'javascript:void(0);')
-      editor.hidePanelOrModal() // 隐藏 modal
-    })
+    const [tagContainerElem] = genUsuallyTagElems(
+      ['班级', '学生姓名', '教师姓名', '奖项'],
+      (value: string) => {
+        insertLink(editor, value, 'javascript:void(0);')
+        editor.hidePanelOrModal() // 隐藏 modal
+      }
+    )
 
     if (this.$content == null) {
       // 第一次渲染
