@@ -18,11 +18,11 @@ class LineHeightMenu implements ISelectMenu {
     const options: IOption[] = []
 
     // 获取配置，参考 './config.ts'
-    const { lineHeightList = [] } = editor.getMenuConfig('lineHeight')
+    const { lineHeightList = [], defaultText } = editor.getMenuConfig('lineHeight')
 
     // 生成 options
     options.push({
-      text: t('lineHeight.default'),
+      text: defaultText || t('lineHeight.default'),
       value: '', // this.getValue(editor) 未找到结果时，会返回 '' ，正好对应到这里
     })
     lineHeightList.forEach((height: string) => {

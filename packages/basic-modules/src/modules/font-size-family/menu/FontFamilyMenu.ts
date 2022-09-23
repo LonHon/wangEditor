@@ -17,11 +17,11 @@ class FontFamilyMenu extends BaseMenu {
     const options: IOption[] = []
 
     // 获取配置，参考 './config.ts'
-    const { fontFamilyList = [] } = editor.getMenuConfig(this.mark)
+    const { fontFamilyList = [], defaultText } = editor.getMenuConfig(this.mark)
 
     // 生成 options
     options.push({
-      text: t('fontFamily.default'),
+      text: defaultText || t('fontFamily.default'),
       value: '', // this.getValue(editor) 未找到结果时，会返回 '' ，正好对应到这里
     })
     fontFamilyList.forEach((family: string | { name: string; value: string }) => {
