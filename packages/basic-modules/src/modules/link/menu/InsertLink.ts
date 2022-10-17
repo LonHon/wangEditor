@@ -31,7 +31,9 @@ function genModalInputElems(
   const $container = $('<label class="babel-container"></label>')
   $container.append(`<span style="display: inline-block;">${labelText}</span>`)
   const $input = $(
-    `<input type="text" style="width: auto;" id="${inputId}" placeholder="${placeholder || ''}">`
+    `<input type="text" style="width: auto;max-width: calc(100% - ${
+      labelText.length + 1
+    }em)" id="${inputId}" placeholder="${placeholder || ''}">`
   )
   $container.append($input)
 
